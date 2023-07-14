@@ -38,6 +38,10 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('me')
   async getAuthenticatedUser(@Request() req: any) {
-    return req.user;
+    return await this.authService.getAuthenticatedUser(
+      this.userService,
+      this.userRepository,
+      req.user.email,
+    );
   }
 }

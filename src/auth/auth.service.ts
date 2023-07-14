@@ -4,6 +4,7 @@ import { UserRepository } from 'src/user/repositories/user-repository';
 import { UserService } from 'src/user/user.service';
 import { SignInBody } from './dtos/sign-in-body';
 import * as bcrypt from 'bcrypt';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -26,5 +27,17 @@ export class AuthService {
     return {
       access_token: await jwtService.signAsync(payload),
     };
+  }
+
+  async getAuthenticatedUser(
+    userService: UserService,
+    userRepository: UserRepository,
+    email: string,
+  ): Promise<User | undefined> {
+    const user = await userService.findOne(userRepository, email);
+
+    delete user.password;
+
+    return user;
   }
 }
