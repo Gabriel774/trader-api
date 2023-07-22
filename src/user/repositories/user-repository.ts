@@ -1,22 +1,27 @@
 import { User } from '@prisma/client';
 
 export abstract class UserRepository {
-  abstract create(
-    name: string,
-    email: string,
-    password: string,
-  ): Promise<User | null>;
+  abstract create(attributes: {
+    name: string;
+    email: string;
+    password: string;
+    profile_pic?: string;
+  }): Promise<User | null>;
 
   abstract findOne(email: string): Promise<User | undefined>;
 
   abstract findAll(): Promise<
-    { id: string; name: string; email: string }[] | undefined
+    { id: number; name: string; email: string }[] | undefined
   >;
 
   abstract update(
-    id: string,
+    id: number,
     attributes: { email?: string; name?: string; password?: string },
   ): Promise<User | null>;
 
-  abstract delete(id: string): Promise<void>;
+  abstract delete(id: number, withStocks?: boolean): Promise<User>;
+
+  abstract getRank(): Promise<
+    { balance: number; name: string; profile_pic: string }[]
+  >;
 }

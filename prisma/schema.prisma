@@ -11,15 +11,17 @@ datasource db {
 }
 
 model User {
-  id         String       @id
-  name       String
-  email      String
-  password   String
-  UserStocks UserStocks[]
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String
+  password    String
+  balance     Int          @default(10000)
+  profile_pic String?
+  UserStocks  UserStocks[]
 }
 
 model Stock {
-  id            String       @id
+  id            Int          @id @default(autoincrement())
   name          String
   initial_value Float
   company_logo  String
@@ -27,11 +29,11 @@ model Stock {
 }
 
 model UserStocks {
-  id       String @id
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String
-  stock    Stock  @relation(fields: [stockId], references: [id])
-  stockId  String
-  quantity Int
+  id       Int   @id @default(autoincrement())
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  stock    Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  stockId  Int
+  quantity Int   @default(0)
   value    Float
 }
