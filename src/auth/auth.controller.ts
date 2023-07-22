@@ -8,12 +8,12 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { UserRepository } from 'src/user/repositories/user-repository';
-import { UserService } from 'src/user/user.service';
+import { UserRepository } from '../user/repositories/user-repository';
+import { UserService } from '../user/user.service';
 import { SignInBody } from './dtos/sign-in-body';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {

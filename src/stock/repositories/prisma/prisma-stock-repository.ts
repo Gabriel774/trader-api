@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { StockRepository } from '../stock-repository';
 import { Injectable } from '@nestjs/common';
 import { Stock } from '@prisma/client';
@@ -33,13 +33,8 @@ export class PrismaStockRepository implements StockRepository {
 
         users.map(
           async (user) =>
-            await this.prisma.userStocks.create({
-              data: {
-                stockId: res.id,
-                userId: user.id,
-                value: res.initial_value,
-              },
-            }),
+            await this.prisma
+              .$queryRaw`INSERT INTO UserStocks( stockId, userId, value ) VALUES ( ${res.id}, ${user.id}, ${res.initial_value} );`,
         );
         return res;
       });
@@ -160,7 +155,11 @@ export class PrismaStockRepository implements StockRepository {
           },
         });
 
-        return { id: userStockId, newBalance, newQuantity };
+        return {
+          id: userStockId,
+          new_balance: newBalance,
+          new_quantity: newQuantity,
+        };
       });
     } catch (err) {
       return err;

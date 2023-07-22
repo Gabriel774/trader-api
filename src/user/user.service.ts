@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from './repositories/user-repository';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -66,12 +66,12 @@ export class UserService {
     }
     const hash = await bcrypt.hash(code, 10);
 
-    await mailerService.sendMail({
-      to: email,
-      from: 'gabrielsantossousa774@gmail.com',
-      subject: 'Código para alteração de senha - Trader',
-      html: `<h3>Código: ${code}</h3>`,
-    });
+    //await mailerService.sendMail({
+    //  to: email,
+    //  from: 'gabrielsantossousa774@gmail.com',
+    //  subject: 'Código para alteração de senha - Trader',
+    //  html: `<h3>Código: ${code}</h3>`,
+    //});
 
     return { code: hash };
   }

@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { UserRepository } from '../user-repository';
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
@@ -38,13 +38,8 @@ export class PrismaUserRepository implements UserRepository {
 
         stocks.map(
           async (stock) =>
-            await this.prisma.userStocks.create({
-              data: {
-                stockId: stock.id,
-                userId: res.id,
-                value: stock.initial_value,
-              },
-            }),
+            await this.prisma
+              .$queryRaw`INSERT INTO UserStocks( stockId, userId, value ) VALUES ( ${stock.id}, ${res.id}, ${stock.initial_value} );`,
         );
 
         delete res.password;
@@ -111,7 +106,7 @@ export class PrismaUserRepository implements UserRepository {
       if (attributes.profile_pic)
         unlinkSync(`upload/${attributes.profile_pic}`);
 
-      return null;
+      return err;
     }
   }
 

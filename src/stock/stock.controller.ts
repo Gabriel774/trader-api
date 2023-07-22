@@ -19,7 +19,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StockRepository } from './repositories/stock-repository';
 import { UpdateStockBody } from './dtos/update-stock-body';
 import { Stock } from '@prisma/client';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import { UpdateUserStockQuantityBody } from './dtos/update-user-stock-quantity-body';
 
 @Controller('stocks')
@@ -36,6 +37,7 @@ export class StockController {
   }
 
   @Post('')
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('company_logo'))
   async create(
     @Body() body: CreateStockBody,
@@ -68,6 +70,7 @@ export class StockController {
   }
 
   @Put('')
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('company_logo'))
   async update(
     @Body() body: UpdateStockBody,
@@ -101,6 +104,7 @@ export class StockController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminGuard)
   async delete(@Param('id') id: number): Promise<Object> {
     await this.stockService.delete(this.stockRepository, id);
     return { msg: 'Stock deleted successfully' };

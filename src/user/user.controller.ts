@@ -18,7 +18,7 @@ import { UserService } from './user.service';
 import { CreateUserBody } from './dtos/create-user-body';
 import { UserRepository } from './repositories/user-repository';
 import { User } from '@prisma/client';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { UpdateUserBody } from './dtos/update-user-body';
 import { ResetCodeBody } from './dtos/generate-reset-code-body';
 import { MailerService } from '@nestjs-modules/mailer';

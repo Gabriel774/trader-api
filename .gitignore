@@ -39,3 +39,6 @@ lerna-debug.log*
 
 # Backlog
 backlog.txt
+
+# ENV
+.env
