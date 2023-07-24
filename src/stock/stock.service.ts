@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { StockRepository } from './repositories/stock-repository';
 import { Stock } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
+import { extname } from 'path';
+import { supabase_credentials } from './constants';
 
 @Injectable()
 export class StockService {
@@ -10,14 +14,35 @@ export class StockService {
 
   async create(
     stockRepository: StockRepository,
-    data: {
+    attributes: {
       name: string;
       initial_value: Number;
-      company_logo: string;
+      company_logo: any;
     },
   ): Promise<Stock> {
-    return await stockRepository.create(data);
+    const supabase = createClient(
+      supabase_credentials.url,
+      supabase_credentials.key,
+    );
+
+    const upload = await supabase.storage
+      .from('trader-images')
+      .upload(
+        `public/${randomUUID()}${extname(
+          attributes.company_logo.originalname,
+        )}`,
+        attributes.company_logo.buffer,
+        {
+          cacheControl: '3600',
+          upsert: false,
+        },
+      );
+    return await stockRepository.create({
+      ...attributes,
+      company_logo: upload.data.path,
+    });
   }
+
   async update(
     stockRepository: StockRepository,
     id: number,

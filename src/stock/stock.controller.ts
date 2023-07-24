@@ -58,7 +58,7 @@ export class StockController {
     const res = await this.stockService.create(this.stockRepository, {
       ...body,
       initial_value: Number(body.initial_value),
-      company_logo: company_logo.filename,
+      company_logo,
     });
 
     if (!res)
