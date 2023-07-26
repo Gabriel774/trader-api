@@ -1,9 +1,11 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '../../../database/prisma.service';
 import { UserRepository } from '../user-repository';
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { unlinkSync } from 'node:fs';
+import { mailerActive } from '../../../constants';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -36,28 +38,31 @@ export class PrismaUserRepository implements UserRepository {
 
         const stocks = await this.prisma.stock.findMany();
 
-        stocks.map(
-          async (stock) =>
-            await this.prisma
-              .$queryRaw`INSERT INTO UserStocks( stockId, userId, value ) VALUES ( ${stock.id}, ${res.id}, ${stock.initial_value} );`,
-        );
+        if (stocks.length > 0) {
+          const rows = [];
+
+          stocks.map(async (stock) =>
+            rows.push([stock.id, res.id, stock.initial_value]),
+          );
+
+          await this.prisma
+            .$executeRaw`INSERT INTO "UserStocks"( "stockId", "userId", value ) VALUES ${Prisma.join(
+            rows.map((row) => Prisma.sql`(${Prisma.join(row)})`),
+          )}`;
+        }
 
         delete res.password;
 
         return res;
       });
     } catch (err) {
-      if (attributes.profile_pic)
-        unlinkSync(`upload/${attributes.profile_pic}`);
-
-      return null;
+      return err;
     }
   }
 
   async findOne(email: string): Promise<User | undefined> {
     return await this.prisma.user.findFirst({
       where: { email },
-      include: { UserStocks: true },
     });
   }
 
@@ -103,9 +108,6 @@ export class PrismaUserRepository implements UserRepository {
         });
       });
     } catch (err) {
-      if (attributes.profile_pic)
-        unlinkSync(`upload/${attributes.profile_pic}`);
-
       return err;
     }
   }
@@ -122,5 +124,74 @@ export class PrismaUserRepository implements UserRepository {
       take: 10,
       select: { balance: true, name: true, profile_pic: true },
     });
+  }
+
+  async generatePasswordResetCode(
+    mailerService: MailerService,
+    email: string,
+  ): Promise<{ code: string }> {
+    const user = await this.findOne(email);
+
+    if (!user) return null;
+
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+
+    for (let i = 0; i < 7; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      code += charset[randomIndex];
+    }
+    const hash = await bcrypt.hash(code, 10);
+
+    if (mailerActive == '1') {
+      await mailerService.sendMail({
+        to: email,
+        from: 'gabrielsantossousa774@gmail.com',
+        subject: 'Código para alteração de senha - Trader',
+        html: `<h3>Código: ${code}</h3>`,
+      });
+    }
+
+    await this.prisma.$transaction(async () => {
+      await this.prisma.user.update({
+        where: { email },
+        data: {
+          password_reset_code: hash,
+        },
+      });
+    });
+
+    return { code: hash };
+  }
+
+  async updateUserPassword(
+    email: string,
+    password_reset_code: string,
+    password: string,
+  ) {
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { email },
+    });
+
+    if (user.password_reset_code) {
+      const isCodeValid = await bcrypt.compare(
+        password_reset_code,
+        user.password_reset_code,
+      );
+
+      if (isCodeValid) {
+        const hash = await bcrypt.hash(password, 10);
+
+        console.log('aaa');
+        return await this.prisma.user.update({
+          where: {
+            email,
+          },
+          data: { password: hash, password_reset_code: null },
+        });
+      }
+    }
+
+    return null;
   }
 }

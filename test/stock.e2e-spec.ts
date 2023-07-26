@@ -69,7 +69,7 @@ describe('StockController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .put('/stocks/update-stock-quantity')
       .send({
-        stock_id: 1,
+        stock_id: 465,
         quantity: 1,
         type: true,
       })

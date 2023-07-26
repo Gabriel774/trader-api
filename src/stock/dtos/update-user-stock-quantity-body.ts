@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, Min } from 'class-validator';
 
 export class UpdateUserStockQuantityBody {
   @IsNotEmpty()
@@ -7,6 +7,7 @@ export class UpdateUserStockQuantityBody {
 
   @IsNotEmpty()
   @IsInt()
+  @Min(1)
   quantity: number;
 
   @IsNotEmpty()

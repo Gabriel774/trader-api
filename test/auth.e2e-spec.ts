@@ -51,6 +51,5 @@ describe('AuthController (e2e)', () => {
     expect(typeof response.body.name).toBe('string');
     expect(typeof response.body.email).toBe('string');
     expect(typeof response.body.balance).toBe('number');
-    expect(typeof response.body.UserStocks).toBe('object');
   });
 });

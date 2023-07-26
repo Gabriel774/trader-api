@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { StockRepository } from './repositories/stock-repository';
 import { Stock } from '@prisma/client';
-import { createClient } from '@supabase/supabase-js';
-import { randomUUID } from 'crypto';
-import { extname } from 'path';
-import { supabase_credentials } from './constants';
 
 @Injectable()
 export class StockService {
@@ -17,42 +13,22 @@ export class StockService {
     attributes: {
       name: string;
       initial_value: Number;
-      company_logo: any;
+      company_logo: string;
     },
   ): Promise<Stock> {
-    const supabase = createClient(
-      supabase_credentials.url,
-      supabase_credentials.key,
-    );
-
-    const upload = await supabase.storage
-      .from('trader-images')
-      .upload(
-        `public/${randomUUID()}${extname(
-          attributes.company_logo.originalname,
-        )}`,
-        attributes.company_logo.buffer,
-        {
-          cacheControl: '3600',
-          upsert: false,
-        },
-      );
-    return await stockRepository.create({
-      ...attributes,
-      company_logo: upload.data.path,
-    });
+    return await stockRepository.create(attributes);
   }
 
   async update(
     stockRepository: StockRepository,
     id: number,
-    data: {
+    attributes: {
       name?: string;
       initial_value?: Number;
       company_logo?: string;
     },
   ): Promise<Stock> {
-    return await stockRepository.update(id, data);
+    return await stockRepository.update(id, attributes);
   }
 
   async delete(
@@ -71,16 +47,19 @@ export class StockService {
 
   async updateStockQuantity(
     stockRepository: StockRepository,
-    user_id: number,
-    stock_id: number,
-    quantity: number,
-    type: boolean,
+    attributes: {
+      user_id: number;
+      stock_id: number;
+      quantity: number;
+      type: boolean;
+    },
   ): Promise<Object> {
+    console.log(attributes);
     return await stockRepository.updateStockQuantity(
-      user_id,
-      stock_id,
-      quantity,
-      type,
+      attributes.user_id,
+      attributes.stock_id,
+      attributes.quantity,
+      attributes.type,
     );
   }
 }

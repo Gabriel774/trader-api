@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Request } from 'express';
-import { adminPassword } from '../constants';
+import { adminPassword } from '../../constants';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

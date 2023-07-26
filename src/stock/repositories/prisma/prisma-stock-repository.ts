@@ -1,7 +1,7 @@
 import { PrismaService } from '../../../database/prisma.service';
 import { StockRepository } from '../stock-repository';
 import { Injectable } from '@nestjs/common';
-import { Stock } from '@prisma/client';
+import { Prisma, Stock } from '@prisma/client';
 import { unlinkSync } from 'node:fs';
 
 @Injectable()
@@ -31,15 +31,22 @@ export class PrismaStockRepository implements StockRepository {
 
         const users = await this.prisma.user.findMany();
 
-        users.map(
-          async (user) =>
-            await this.prisma
-              .$queryRaw`INSERT INTO UserStocks( stockId, userId, value ) VALUES ( ${res.id}, ${user.id}, ${res.initial_value} );`,
-        );
+        if (users.length > 0) {
+          const rows = [];
+
+          users.map(async (user) =>
+            rows.push([res.id, user.id, res.initial_value]),
+          );
+
+          await this.prisma
+            .$queryRaw`INSERT INTO "UserStocks"( "stockId", "userId", value )  VALUES ${Prisma.join(
+            rows.map((row) => Prisma.sql`(${Prisma.join(row)})`),
+          )};`;
+        }
+
         return res;
       });
     } catch (err) {
-      unlinkSync(`upload/${attributes.company_logo}`);
       return null;
     }
   }
@@ -60,8 +67,6 @@ export class PrismaStockRepository implements StockRepository {
         },
       });
     } catch (err) {
-      if (attributes.company_logo)
-        unlinkSync(`upload/${attributes.company_logo}`);
       return null;
     }
   }
@@ -103,13 +108,13 @@ export class PrismaStockRepository implements StockRepository {
 
         res.map(async (stock) => {
           return await this.prisma
-            .$queryRaw`UPDATE UserStocks SET value = ${stock.value} WHERE id = ${stock.id}`;
+            .$queryRaw`UPDATE "UserStocks" SET value = ${stock.value} WHERE id = ${stock.id}`;
         });
       });
 
       return await this.getAll(id);
     } catch (err) {
-      return err;
+      return null;
     }
   }
 
@@ -124,8 +129,9 @@ export class PrismaStockRepository implements StockRepository {
         const user = await this.prisma.user.findFirstOrThrow({
           where: { id: userId },
         });
+
         const userStock = await this.prisma.userStocks.findFirstOrThrow({
-          where: { id: userStockId },
+          where: { id: Number(userStockId) },
         });
 
         if (userStock.quantity - quantity < 0 && !type)
@@ -162,7 +168,7 @@ export class PrismaStockRepository implements StockRepository {
         };
       });
     } catch (err) {
-      return err;
+      return null;
     }
   }
 }

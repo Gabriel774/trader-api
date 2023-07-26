@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './repositories/user-repository';
 import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -53,27 +52,20 @@ export class UserService {
     mailerService: MailerService,
     email: string,
   ): Promise<{ code: string }> {
-    const userExists = await userRepository.findOne(email);
+    return await userRepository.generatePasswordResetCode(mailerService, email);
+  }
 
-    if (!userExists) return null;
-
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-
-    for (let i = 0; i < 7; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      code += charset[randomIndex];
-    }
-    const hash = await bcrypt.hash(code, 10);
-
-    //await mailerService.sendMail({
-    //  to: email,
-    //  from: 'gabrielsantossousa774@gmail.com',
-    //  subject: 'Código para alteração de senha - Trader',
-    //  html: `<h3>Código: ${code}</h3>`,
-    //});
-
-    return { code: hash };
+  async updateUserPassword(
+    userRepository: UserRepository,
+    email: string,
+    password_reset_code: string,
+    password: string,
+  ) {
+    return await userRepository.updateUserPassword(
+      email,
+      password_reset_code,
+      password,
+    );
   }
 
   async getRank(

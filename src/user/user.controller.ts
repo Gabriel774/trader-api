@@ -6,7 +6,6 @@ import {
   Get,
   HttpCode,
   NotFoundException,
-  ParseFilePipeBuilder,
   Post,
   Put,
   Request,
@@ -23,13 +22,19 @@ import { UpdateUserBody } from './dtos/update-user-body';
 import { ResetCodeBody } from './dtos/generate-reset-code-body';
 import { MailerService } from '@nestjs-modules/mailer';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { imageValidation } from '../utils/imageValidation';
+import { SupabaseService } from '../supabase/supabase.service';
+import { Supabase } from '../supabase/supabase';
+import { UpdateUserPasswordBody } from './dtos/update-user-password-body';
 
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private userRepository: UserRepository,
+    private readonly supabaseService: SupabaseService,
     private mailerService: MailerService,
+    private userRepository: UserRepository,
+    private supabase: Supabase,
   ) {}
 
   @Get('')
@@ -43,23 +48,16 @@ export class UserController {
   @UseInterceptors(FileInterceptor('profile_pic'))
   async create(
     @Body() body: CreateUserBody,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'png|jpg|jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000,
-        })
-        .build({
-          fileIsRequired: false,
-        }),
-    )
+    @UploadedFile(imageValidation({ required: false }))
     profile_pic: Express.Multer.File,
   ): Promise<User | null> {
+    const uploaded_image = profile_pic
+      ? await this.supabaseService.uploadImage(this.supabase, profile_pic)
+      : undefined;
+
     const res = await this.userService.create(this.userRepository, {
       ...body,
-      profile_pic: profile_pic ? profile_pic.filename : undefined,
+      profile_pic: uploaded_image,
     });
 
     if (!res) throw new BadRequestException({ msg: 'Email already exists' });
@@ -73,24 +71,17 @@ export class UserController {
   async update(
     @Body() body: UpdateUserBody,
     @Request() req: any,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'png|jpg|jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000,
-        })
-        .build({
-          fileIsRequired: false,
-        }),
-    )
+    @UploadedFile(imageValidation({ required: false }))
     profile_pic: Express.Multer.File,
   ): Promise<User | null> {
+    const uploaded_image = profile_pic
+      ? await this.supabaseService.uploadImage(this.supabase, profile_pic)
+      : undefined;
+
     const res = await this.userService.update(
       this.userRepository,
       req.user.sub,
-      { ...body, profile_pic: profile_pic ? profile_pic.filename : undefined },
+      { ...body, profile_pic: uploaded_image },
     );
 
     if (!res) throw new BadRequestException({ msg: 'Email already exists' });
@@ -120,6 +111,24 @@ export class UserController {
     if (!res) throw new NotFoundException({ msg: 'E-mail does not exist' });
 
     return res;
+  }
+
+  @HttpCode(200)
+  @Post('recover-password')
+  async updateUserPassword(@Body() body: UpdateUserPasswordBody) {
+    const res = await this.userService.updateUserPassword(
+      this.userRepository,
+      body.email,
+      body.password_reset_code,
+      body.password,
+    );
+
+    if (!res)
+      throw new BadRequestException({
+        msg: 'E-mail not found or code invalid',
+      });
+
+    return { msg: 'Updated Successfully' };
   }
 
   @Get('rank')

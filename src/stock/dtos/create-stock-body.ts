@@ -1,10 +1,5 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsNumberString,
-  IsString,
-  Length,
-} from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsString, Length, Min } from 'class-validator';
 
 export class CreateStockBody {
   @IsNotEmpty()
@@ -13,6 +8,10 @@ export class CreateStockBody {
   name: string;
 
   @IsNotEmpty()
-  @IsNumberString()
+  @Transform(({ value }) => {
+    return Number(value);
+  })
+  @IsInt()
+  @Min(1)
   initial_value: string;
 }

@@ -5,7 +5,6 @@ import {
   Get,
   InternalServerErrorException,
   Param,
-  ParseFilePipeBuilder,
   Post,
   Put,
   Request,
@@ -22,12 +21,17 @@ import { Stock } from '@prisma/client';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UpdateUserStockQuantityBody } from './dtos/update-user-stock-quantity-body';
+import { imageValidation } from '../utils/imageValidation';
+import { SupabaseService } from '../supabase/supabase.service';
+import { Supabase } from '../supabase/supabase';
 
 @Controller('stocks')
 export class StockController {
   constructor(
     private readonly stockService: StockService,
     private stockRepository: StockRepository,
+    private readonly supabaseService: SupabaseService,
+    private supabase: Supabase,
   ) {}
 
   @Get('')
@@ -41,24 +45,18 @@ export class StockController {
   @UseInterceptors(FileInterceptor('company_logo'))
   async create(
     @Body() body: CreateStockBody,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'png|jpg|jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000,
-        })
-        .build({
-          fileIsRequired: true,
-        }),
-    )
+    @UploadedFile(imageValidation({ required: true }))
     company_logo: Express.Multer.File,
-  ) {
+  ): Promise<Stock> {
+    const uploaded_image = await this.supabaseService.uploadImage(
+      this.supabase,
+      company_logo,
+    );
+
     const res = await this.stockService.create(this.stockRepository, {
       ...body,
       initial_value: Number(body.initial_value),
-      company_logo,
+      company_logo: uploaded_image,
     });
 
     if (!res)
@@ -74,25 +72,18 @@ export class StockController {
   @UseInterceptors(FileInterceptor('company_logo'))
   async update(
     @Body() body: UpdateStockBody,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'png|jpg|jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000,
-        })
-        .build({
-          fileIsRequired: false,
-        }),
-    )
+    @UploadedFile(imageValidation({ required: false }))
     company_logo: Express.Multer.File,
-  ) {
+  ): Promise<Stock> {
+    const uploaded_image = company_logo
+      ? await this.supabaseService.uploadImage(this.supabase, company_logo)
+      : undefined;
+
     const res = await this.stockService.update(this.stockRepository, body.id, {
       initial_value: body.initial_value
         ? Number(body.initial_value)
         : undefined,
-      company_logo: company_logo ? company_logo.filename : undefined,
+      company_logo: uploaded_image,
     });
 
     if (!res)
@@ -124,13 +115,12 @@ export class StockController {
   async updateStockQuantity(
     @Body() body: UpdateUserStockQuantityBody,
     @Request() req: any,
-  ): Promise<any> {
-    return await this.stockService.updateStockQuantity(
-      this.stockRepository,
-      req.user.sub,
-      body.stock_id,
-      body.quantity,
-      body.type,
-    );
+  ): Promise<Object> {
+    return await this.stockService.updateStockQuantity(this.stockRepository, {
+      user_id: req.user.sub,
+      stock_id: body.stock_id,
+      quantity: body.quantity,
+      type: body.type,
+    });
   }
 }

@@ -1,9 +1,12 @@
+import { Transform } from 'class-transformer';
 import {
+  IsInt,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
   Length,
+  Min,
 } from 'class-validator';
 
 export class UpdateStockBody {
@@ -17,6 +20,10 @@ export class UpdateStockBody {
   name?: string;
 
   @IsOptional()
-  @IsNumberString()
+  @Transform(({ value }) => {
+    return Number(value);
+  })
+  @IsInt()
+  @Min(1)
   initial_value?: string;
 }
