@@ -12,14 +12,12 @@ datasource db {
 }
 
 model User {
-  id                  Int          @id @default(autoincrement())
-  name                String
-  email               String       @unique
-  password            String
-  balance             Int          @default(10000)
-  profile_pic         String?
-  password_reset_code String?
-  UserStocks          UserStocks[]
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  password    String
+  balance     Int          @default(10000)
+  profile_pic String?
+  UserStocks  UserStocks[]
 }
 
 model Stock {

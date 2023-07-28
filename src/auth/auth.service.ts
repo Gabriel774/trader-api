@@ -12,9 +12,9 @@ export class AuthService {
     userService: UserService,
     userRepository: UserRepository,
     jwtService: JwtService,
-    { email, password }: SignInBody,
+    { name, password }: SignInBody,
   ): Promise<{ access_token: string }> {
-    const user = await userService.findOne(userRepository, email);
+    const user = await userService.findOne(userRepository, name);
 
     if (!user) throw new UnauthorizedException();
 
@@ -22,7 +22,7 @@ export class AuthService {
 
     if (!valid) throw new UnauthorizedException();
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, name: user.name };
 
     return {
       access_token: await jwtService.signAsync(payload),
@@ -32,9 +32,9 @@ export class AuthService {
   async getAuthenticatedUser(
     userService: UserService,
     userRepository: UserRepository,
-    email: string,
+    name: string,
   ): Promise<User | undefined> {
-    const user = await userService.findOne(userRepository, email);
+    const user = await userService.findOne(userRepository, name);
 
     delete user.password;
 

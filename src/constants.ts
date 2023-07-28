@@ -10,10 +10,3 @@ export const supabase_credentials = {
 };
 
 export const mailerActive = process.env.MAILER_ACTIVE;
-
-export const smtp = {
-  server: process.env.SMTP_SERVER,
-  port: Number(process.env.SMTP_PORT),
-  user: process.env.SMTP_USER,
-  password: process.env.SMTP_PASSWORD,
-};

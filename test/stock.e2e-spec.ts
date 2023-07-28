@@ -22,7 +22,7 @@ describe('StockController (e2e)', () => {
 
   it('/stocks (GET)', async () => {
     const auth = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'teste@email.com',
+      name: 'testerson',
       password: userTestPassword,
     });
 
@@ -41,7 +41,7 @@ describe('StockController (e2e)', () => {
 
   it('/stocks/update-stocks-value (PUT)', async () => {
     const auth = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'teste@email.com',
+      name: 'testerson',
       password: userTestPassword,
     });
 
@@ -60,7 +60,7 @@ describe('StockController (e2e)', () => {
 
   it('/stocks/update-stock-quantity (PUT)', async () => {
     const auth = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'teste@email.com',
+      name: 'testerson',
       password: userTestPassword,
     });
 
@@ -69,7 +69,7 @@ describe('StockController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .put('/stocks/update-stock-quantity')
       .send({
-        stock_id: 465,
+        stock_id: 1,
         quantity: 1,
         type: true,
       })

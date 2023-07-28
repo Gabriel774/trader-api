@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './repositories/user-repository';
 import { User } from '@prisma/client';
-import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UserService {
@@ -9,7 +8,6 @@ export class UserService {
     userRepository: UserRepository,
     attributes: {
       name: string;
-      email: string;
       password: string;
       profile_pic?: string;
     },
@@ -19,15 +17,15 @@ export class UserService {
 
   async findAll(
     userRepository: UserRepository,
-  ): Promise<{ id: number; name: string; email: string }[] | undefined> {
+  ): Promise<{ id: number; name: string }[] | undefined> {
     return await userRepository.findAll();
   }
 
   async findOne(
     userRepository: UserRepository,
-    email: string,
+    name: string,
   ): Promise<User | undefined> {
-    return await userRepository.findOne(email);
+    return await userRepository.findOne(name);
   }
 
   async update(
@@ -35,7 +33,6 @@ export class UserService {
     id: number,
     attributes: {
       name?: string;
-      email?: string;
       password?: string;
       profile_pic?: string;
     },
@@ -45,27 +42,6 @@ export class UserService {
 
   async delete(userRepository: UserRepository, id: number): Promise<User> {
     return await userRepository.delete(id);
-  }
-
-  async getPasswordResetCode(
-    userRepository: UserRepository,
-    mailerService: MailerService,
-    email: string,
-  ): Promise<{ code: string }> {
-    return await userRepository.generatePasswordResetCode(mailerService, email);
-  }
-
-  async updateUserPassword(
-    userRepository: UserRepository,
-    email: string,
-    password_reset_code: string,
-    password: string,
-  ) {
-    return await userRepository.updateUserPassword(
-      email,
-      password_reset_code,
-      password,
-    );
   }
 
   async getRank(

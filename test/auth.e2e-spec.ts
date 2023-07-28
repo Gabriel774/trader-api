@@ -24,7 +24,7 @@ describe('AuthController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
-        email: 'teste@email.com',
+        name: 'testerson',
         password: userTestPassword,
       });
 
@@ -35,7 +35,7 @@ describe('AuthController (e2e)', () => {
 
   it('/auth/me (GET)', async () => {
     const auth = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'teste@email.com',
+      name: 'testerson',
       password: userTestPassword,
     });
 
@@ -49,7 +49,6 @@ describe('AuthController (e2e)', () => {
     expect(typeof response.body).toBe('object');
     expect(typeof response.body.id).toBe('number');
     expect(typeof response.body.name).toBe('string');
-    expect(typeof response.body.email).toBe('string');
     expect(typeof response.body.balance).toBe('number');
   });
 });
