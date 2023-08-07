@@ -3,7 +3,7 @@ import { Stock } from '@prisma/client';
 export abstract class StockRepository {
   abstract create(attributes: {
     name: string;
-    initial_value: Number;
+    initial_value: number;
     company_logo: string;
   }): Promise<Stock | null>;
 
@@ -11,7 +11,7 @@ export abstract class StockRepository {
     id: number,
     attributes: {
       name?: string;
-      initial_value?: Number;
+      initial_value?: number;
       company_logo?: string;
     },
   ): Promise<Stock | null>;
@@ -27,5 +27,5 @@ export abstract class StockRepository {
     userStockId: number,
     quantity: number,
     type: boolean,
-  ): Promise<Object>;
+  ): Promise<object>;
 }

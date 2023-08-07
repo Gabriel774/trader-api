@@ -96,7 +96,7 @@ export class StockController {
 
   @Delete(':id')
   @UseGuards(AdminGuard)
-  async delete(@Param('id') id: number): Promise<Object> {
+  async delete(@Param('id') id: number): Promise<object> {
     await this.stockService.delete(this.stockRepository, id);
     return { msg: 'Stock deleted successfully' };
   }
@@ -115,7 +115,7 @@ export class StockController {
   async updateStockQuantity(
     @Body() body: UpdateUserStockQuantityBody,
     @Request() req: any,
-  ): Promise<Object> {
+  ): Promise<object> {
     return await this.stockService.updateStockQuantity(this.stockRepository, {
       user_id: req.user.sub,
       stock_id: body.stock_id,

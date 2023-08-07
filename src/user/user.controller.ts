@@ -85,7 +85,7 @@ export class UserController {
   @HttpCode(204)
   @UseGuards(AuthGuard)
   @Delete('')
-  async delete(@Request() req: any): Promise<Object> {
+  async delete(@Request() req: any): Promise<object> {
     await this.userService.delete(this.userRepository, req.user.sub);
     return { msg: 'User deleted successfully' };
   }

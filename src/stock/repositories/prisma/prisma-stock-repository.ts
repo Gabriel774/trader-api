@@ -94,8 +94,8 @@ export class PrismaStockRepository implements StockRepository {
         const stocks = [...user.UserStocks];
 
         const res = stocks.map((stock) => {
-          let random = Math.random();
-          let variation = Math.round(Math.random() * 50);
+          const random = Math.random();
+          const variation = Math.round(Math.random() * 50);
 
           random > 0.5
             ? (stock.value -= variation)
@@ -123,7 +123,7 @@ export class PrismaStockRepository implements StockRepository {
     userStockId: number,
     quantity: number,
     type: boolean,
-  ): Promise<Object> {
+  ): Promise<object> {
     try {
       return await this.prisma.$transaction(async () => {
         const user = await this.prisma.user.findFirstOrThrow({

@@ -12,7 +12,7 @@ export class StockService {
     stockRepository: StockRepository,
     attributes: {
       name: string;
-      initial_value: Number;
+      initial_value: number;
       company_logo: string;
     },
   ): Promise<Stock> {
@@ -24,7 +24,7 @@ export class StockService {
     id: number,
     attributes: {
       name?: string;
-      initial_value?: Number;
+      initial_value?: number;
       company_logo?: string;
     },
   ): Promise<Stock> {
@@ -53,7 +53,7 @@ export class StockService {
       quantity: number;
       type: boolean;
     },
-  ): Promise<Object> {
+  ): Promise<object> {
     console.log(attributes);
     return await stockRepository.updateStockQuantity(
       attributes.user_id,
