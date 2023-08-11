@@ -5,13 +5,11 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const options = {
+  app.enableCors({
     allowedHeaders: ['content-type', 'multipart/form-data'],
-    origin: ['http://localhost:3000', 'https://trader-app-ten.vercel.app/'],
+    origin: '*',
     credentials: true,
-  };
-
-  app.enableCors(options);
+  });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   await app.listen(3333);
