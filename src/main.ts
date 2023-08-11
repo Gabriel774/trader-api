@@ -6,10 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const options = {
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
+    allowedHeaders: ['content-type', 'multipart/form-data'],
+    origin: ['http://localhost:3000', 'https://trader-app-ten.vercel.app/'],
     credentials: true,
   };
 
