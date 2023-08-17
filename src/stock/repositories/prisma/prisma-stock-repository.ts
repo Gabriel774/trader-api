@@ -2,7 +2,6 @@ import { PrismaService } from '../../../database/prisma.service';
 import { StockRepository } from '../stock-repository';
 import { Injectable } from '@nestjs/common';
 import { Prisma, Stock } from '@prisma/client';
-import { unlinkSync } from 'node:fs';
 
 @Injectable()
 export class PrismaStockRepository implements StockRepository {
@@ -73,10 +72,6 @@ export class PrismaStockRepository implements StockRepository {
 
   async delete(id: number): Promise<Stock | null> {
     try {
-      const res = await this.prisma.stock.delete({ where: { id } });
-
-      unlinkSync(`upload/${res.company_logo}`);
-
       return await this.prisma.stock.delete({ where: { id } });
     } catch (err) {
       return null;

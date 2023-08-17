@@ -3,7 +3,6 @@ import { UserRepository } from '../user-repository';
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { unlinkSync } from 'node:fs';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -90,12 +89,6 @@ export class PrismaUserRepository implements UserRepository {
           });
 
           if (nameSearch?.name === attributes.name) return null;
-        }
-
-        if (attributes.profile_pic) {
-          const user = await this.prisma.user.findFirst({ where: { id } });
-
-          if (user.profile_pic) unlinkSync(`upload/${user.profile_pic}`);
         }
 
         return await this.prisma.user.update({
