@@ -41,11 +41,7 @@ export class UserService {
       profile_pic?: string;
     },
   ): Promise<User | undefined> {
-    const res = await userRepository.update(id, attributes);
-
-    delete res.password;
-
-    return res;
+    return await userRepository.update(id, attributes);
   }
 
   async delete(userRepository: UserRepository, id: number): Promise<User> {

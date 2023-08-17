@@ -94,13 +94,19 @@ export class PrismaUserRepository implements UserRepository {
             where: { name: attributes.name },
           });
 
-          if (nameSearch?.name === attributes.name) return null;
+          if (nameSearch?.name === attributes.name && nameSearch?.id !== id) {
+            return null;
+          }
         }
 
-        return await this.prisma.user.update({
+        const res = await this.prisma.user.update({
           data: attributes,
           where: { id },
         });
+
+        delete res.password;
+
+        return res;
       });
     } catch (err) {
       return err;
