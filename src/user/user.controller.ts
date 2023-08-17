@@ -96,4 +96,13 @@ export class UserController {
   > {
     return this.userService.getRank(this.userRepository);
   }
+
+  @UseGuards(AuthGuard)
+  @Get('reset-data')
+  async resetUserData(@Request() req: any): Promise<void> {
+    return await this.userService.resetUserData(
+      this.userRepository,
+      req.user.sub,
+    );
+  }
 }

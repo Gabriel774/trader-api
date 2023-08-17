@@ -54,7 +54,6 @@ export class StockService {
       type: boolean;
     },
   ): Promise<object> {
-    console.log(attributes);
     return await stockRepository.updateStockQuantity(
       attributes.user_id,
       attributes.stock_id,

@@ -53,4 +53,8 @@ export class UserService {
   ): Promise<{ balance: number; name: string; profile_pic: string }[]> {
     return await userRepository.getRank();
   }
+
+  async resetUserData(userRepository: UserRepository, id: number) {
+    return await userRepository.resetUserData(id);
+  }
 }

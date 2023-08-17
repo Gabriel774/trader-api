@@ -16,6 +16,8 @@ export abstract class UserRepository {
     | undefined
   >;
 
+  abstract resetUserData(id: number): Promise<void>;
+
   abstract update(
     id: number,
     attributes: {
