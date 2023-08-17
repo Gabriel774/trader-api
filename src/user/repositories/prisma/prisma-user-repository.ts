@@ -61,6 +61,12 @@ export class PrismaUserRepository implements UserRepository {
     });
   }
 
+  async findOneById(id: number): Promise<User | undefined> {
+    return await this.prisma.user.findFirst({
+      where: { id },
+    });
+  }
+
   async findAll(): Promise<
     | { id: number; name: string; profile_pic: string; balance: number }[]
     | undefined

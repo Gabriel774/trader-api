@@ -9,6 +9,8 @@ export abstract class UserRepository {
 
   abstract findOne(name: string): Promise<User | undefined>;
 
+  abstract findOneById(id: number): Promise<User | undefined>;
+
   abstract findAll(): Promise<
     | { id: number; name: string; profile_pic: string; balance: number }[]
     | undefined

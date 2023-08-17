@@ -41,7 +41,7 @@ export class AuthController {
     return await this.authService.getAuthenticatedUser(
       this.userService,
       this.userRepository,
-      req.user.name,
+      req.user.sub,
     );
   }
 }

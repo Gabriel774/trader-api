@@ -28,6 +28,10 @@ export class UserService {
     return await userRepository.findOne(name);
   }
 
+  async findOneById(userRepository: UserRepository, id: number) {
+    return await userRepository.findOneById(id);
+  }
+
   async update(
     userRepository: UserRepository,
     id: number,
@@ -37,7 +41,11 @@ export class UserService {
       profile_pic?: string;
     },
   ): Promise<User | undefined> {
-    return await userRepository.update(id, attributes);
+    const res = await userRepository.update(id, attributes);
+
+    delete res.password;
+
+    return res;
   }
 
   async delete(userRepository: UserRepository, id: number): Promise<User> {

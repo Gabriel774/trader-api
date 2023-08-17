@@ -32,9 +32,9 @@ export class AuthService {
   async getAuthenticatedUser(
     userService: UserService,
     userRepository: UserRepository,
-    name: string,
+    id: number,
   ): Promise<User | undefined> {
-    const user = await userService.findOne(userRepository, name);
+    const user = await userService.findOneById(userRepository, id);
 
     delete user.password;
 
