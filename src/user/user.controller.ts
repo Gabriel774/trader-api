@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Patch,
   Post,
   Put,
   Request,
@@ -98,7 +99,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('reset-data')
+  @Patch('reset-data')
   async resetUserData(@Request() req: any): Promise<void> {
     return await this.userService.resetUserData(
       this.userRepository,
