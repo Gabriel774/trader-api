@@ -130,7 +130,9 @@ export class PrismaUserRepository implements UserRepository {
   async resetUserData(id: number): Promise<void> {
     await this.prisma.user.update({ where: { id }, data: { balance: 10000 } });
 
-    const userStocks = await this.prisma.userStocks.findMany({});
+    const userStocks = await this.prisma.userStocks.findMany({
+      where: { userId: id },
+    });
 
     userStocks.map(async (userStock) => {
       const stock = await this.prisma.stock.findFirst({
