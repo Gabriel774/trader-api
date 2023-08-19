@@ -98,6 +98,8 @@ export class PrismaStockRepository implements StockRepository {
 
           if (stock.value < 1) stock.value = 1;
 
+          if (stock.value > 10000) stock.value = 10000;
+
           return stock;
         });
 
