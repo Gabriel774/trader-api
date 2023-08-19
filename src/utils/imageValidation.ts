@@ -6,7 +6,7 @@ export const imageValidation = ({ required }: { required: boolean }) => {
       fileType: 'png|jpg|jpeg',
     })
     .addMaxSizeValidator({
-      maxSize: 1000000,
+      maxSize: 10000000,
     })
     .build({
       fileIsRequired: required,
