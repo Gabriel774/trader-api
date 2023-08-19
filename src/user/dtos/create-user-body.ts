@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, Length } from 'class-validator';
 export class CreateUserBody {
   @IsNotEmpty()
   @IsString()
-  @Length(3, 50)
+  @Length(3, 16)
   name: string;
 
   @IsNotEmpty()
