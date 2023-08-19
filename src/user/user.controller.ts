@@ -91,6 +91,7 @@ export class UserController {
     return { msg: 'User deleted successfully' };
   }
 
+  @UseGuards(AuthGuard)
   @Get('rank')
   async getRank(): Promise<
     { balance: number; name: string; profile_pic: string }[]
