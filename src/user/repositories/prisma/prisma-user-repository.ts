@@ -122,7 +122,7 @@ export class PrismaUserRepository implements UserRepository {
   > {
     return await this.prisma.user.findMany({
       orderBy: { balance: 'desc' },
-      take: 10,
+      take: 12,
       select: { balance: true, name: true, profile_pic: true },
     });
   }
