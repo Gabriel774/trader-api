@@ -90,13 +90,13 @@ export class PrismaStockRepository implements StockRepository {
 
         const res = stocks.map((stock) => {
           const random = Math.random();
-          const variation = Math.round(Math.random() * 50);
+          const variation = Math.round(Math.random() * 30);
 
           random > 0.5
             ? (stock.value -= variation)
             : (stock.value += variation);
 
-          if (stock.value < 1) stock.value = 1;
+          if (stock.value < 50) stock.value = 50;
 
           if (stock.value > 10000) stock.value = 10000;
 
