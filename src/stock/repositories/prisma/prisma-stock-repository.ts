@@ -1,7 +1,7 @@
 import { PrismaService } from '../../../database/prisma.service';
 import { StockRepository } from '../stock-repository';
 import { Injectable } from '@nestjs/common';
-import { Prisma, Stock } from '@prisma/client';
+import { Prisma, Stock, UserStocks } from '@prisma/client';
 
 @Injectable()
 export class PrismaStockRepository implements StockRepository {
@@ -80,12 +80,9 @@ export class PrismaStockRepository implements StockRepository {
 
   async updateStocksValue(id: number): Promise<Stock[]> {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id },
-        include: { UserStocks: true },
-      });
-
-      const stocks = [...user.UserStocks];
+      const stocks = await this.prisma.$queryRaw<
+        UserStocks[]
+      >`SELECT * FROM "UserStocks" WHERE "userId" = ${id}`;
 
       stocks.map(async (stock) => {
         const random = Math.random();
@@ -103,6 +100,7 @@ export class PrismaStockRepository implements StockRepository {
 
       return await this.getAll(id);
     } catch (err) {
+      console.log(err);
       return null;
     }
   }
