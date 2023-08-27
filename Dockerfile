@@ -4,5 +4,5 @@ COPY . /app
 RUN npm install
 RUN npx prisma generate
 RUN npx nest build
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
 EXPOSE 3000
