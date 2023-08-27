@@ -80,33 +80,25 @@ export class PrismaStockRepository implements StockRepository {
 
   async updateStocksValue(id: number): Promise<Stock[]> {
     try {
-      await this.prisma.$transaction(async () => {
-        const user = await this.prisma.user.findFirstOrThrow({
-          where: { id },
-          include: { UserStocks: true },
-        });
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        include: { UserStocks: true },
+      });
 
-        const stocks = [...user.UserStocks];
+      const stocks = [...user.UserStocks];
 
-        const res = stocks.map((stock) => {
-          const random = Math.random();
-          const variation = Math.round(Math.random() * 30);
+      stocks.map(async (stock) => {
+        const random = Math.random();
+        const variation = Math.round(Math.random() * 30);
 
-          random > 0.5
-            ? (stock.value -= variation)
-            : (stock.value += variation);
+        random > 0.5 ? (stock.value -= variation) : (stock.value += variation);
 
-          if (stock.value < 50) stock.value = 50;
+        if (stock.value < 50) stock.value = 50;
 
-          if (stock.value > 10000) stock.value = 10000;
+        if (stock.value > 10000) stock.value = 10000;
 
-          return stock;
-        });
-
-        res.map(async (stock) => {
-          return await this.prisma
-            .$queryRaw`UPDATE "UserStocks" SET value = ${stock.value} WHERE id = ${stock.id}`;
-        });
+        return await this.prisma
+          .$queryRaw`UPDATE "UserStocks" SET value = ${stock.value} WHERE id = ${stock.id}`;
       });
 
       return await this.getAll(id);
