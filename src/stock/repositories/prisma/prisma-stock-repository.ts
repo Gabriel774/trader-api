@@ -82,7 +82,7 @@ export class PrismaStockRepository implements StockRepository {
     try {
       const stocks = await this.prisma.$queryRaw<
         UserStocks[]
-      >`SELECT (id, value) FROM "UserStocks" WHERE "userId" = ${id} ORDER BY RANDOM() limit 10`;
+      >`SELECT * FROM "UserStocks" WHERE "userId" = ${id} ORDER BY RANDOM() limit 10`;
 
       stocks.map(async (stock) => {
         const random = Math.random();
