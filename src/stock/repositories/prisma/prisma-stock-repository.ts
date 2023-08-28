@@ -82,11 +82,11 @@ export class PrismaStockRepository implements StockRepository {
     try {
       const stocks = await this.prisma.$queryRaw<
         UserStocks[]
-      >`SELECT * FROM "UserStocks" WHERE "userId" = ${id} ORDER BY RANDOM() limit 10`;
+      >`SELECT (id, value) FROM "UserStocks" WHERE "userId" = ${id} ORDER BY RANDOM() limit 10`;
 
       stocks.map(async (stock) => {
         const random = Math.random();
-        const variation = Math.round(Math.random() * 30);
+        const variation = Math.round(Math.random() * 50);
 
         random > 0.5 ? (stock.value -= variation) : (stock.value += variation);
 
@@ -112,49 +112,42 @@ export class PrismaStockRepository implements StockRepository {
     type: boolean,
   ): Promise<object> {
     try {
-      return await this.prisma.$transaction(async () => {
-        const user = await this.prisma.user.findUnique({
-          where: { id: userId },
-        });
-
-        const userStock = await this.prisma.userStocks.findUnique({
-          where: { id: Number(userStockId) },
-        });
-
-        if (userStock.quantity - quantity < 0 && !type)
-          return { msg: 'Invalid quantity' };
-
-        const newBalance = type
-          ? user.balance - userStock.value * quantity
-          : user.balance + userStock.value * quantity;
-
-        if (newBalance < 0) return { msg: 'Not enough funds' };
-
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            balance: newBalance,
-          },
-        });
-
-        const newQuantity = type
-          ? userStock.quantity + quantity
-          : userStock.quantity - quantity;
-
-        await this.prisma.userStocks.update({
-          where: { id: userStockId },
-          data: {
-            quantity: newQuantity,
-          },
-        });
-
-        return {
-          id: userStockId,
-          new_balance: newBalance,
-          new_quantity: newQuantity,
-        };
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { balance: true },
       });
+
+      const userStock = await this.prisma.userStocks.findUnique({
+        where: { id: Number(userStockId) },
+        select: { value: true, quantity: true },
+      });
+
+      if (userStock.quantity - quantity < 0 && !type)
+        return { msg: 'Invalid quantity' };
+
+      const newBalance = type
+        ? user.balance - userStock.value * quantity
+        : user.balance + userStock.value * quantity;
+
+      if (newBalance < 0) return { msg: 'Not enough funds' };
+
+      await this.prisma
+        .$queryRaw`UPDATE "User" SET balance = ${newBalance} WHERE id = ${userId}`;
+
+      const newQuantity = type
+        ? userStock.quantity + quantity
+        : userStock.quantity - quantity;
+
+      await this.prisma
+        .$queryRaw`UPDATE "UserStocks" SET quantity = ${newQuantity} WHERE id = ${userStockId}`;
+
+      return {
+        id: userStockId,
+        new_balance: newBalance,
+        new_quantity: newQuantity,
+      };
     } catch (err) {
+      console.log(err);
       return null;
     }
   }
