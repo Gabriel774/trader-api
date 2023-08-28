@@ -51,7 +51,7 @@ describe('UserController (e2e)', () => {
     expect(typeof response.body).toBe('object');
     expect(typeof response.body.id).toBe('number');
     expect(response.body.name).toBe(random);
-    expect(response.body.balance).toBe(10000);
+    expect(response.body.balance).toBe(2500);
     expect(response.body.profile_pic).toBe(null);
 
     const auth = await request(app.getHttpServer()).post('/auth/login').send({
