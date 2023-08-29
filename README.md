@@ -29,27 +29,29 @@
 ## Installation
 
 ```bash
-$ pnpm install
+$ npm install
+
+$ npx prisma generate
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ pnpm run start
+$ npm run start
 
 # watch mode
-$ pnpm run start:dev
+$ npm run start:dev
 
 # production mode
-$ pnpm run start:prod
+$ npm run start:prod
 ```
 
 ## Test
 
 ```bash
 # e2e tests
-$ pnpm run test:e2e
+$ npm run test:e2e
 ```
 
 ## Support
