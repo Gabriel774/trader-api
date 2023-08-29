@@ -1,7 +1,7 @@
 import { PrismaService } from '../../../database/prisma.service';
 import { StockRepository } from '../stock-repository';
 import { Injectable } from '@nestjs/common';
-import { Prisma, Stock, UserStocks } from '@prisma/client';
+import { Prisma, Stock } from '@prisma/client';
 
 @Injectable()
 export class PrismaStockRepository implements StockRepository {
@@ -80,21 +80,7 @@ export class PrismaStockRepository implements StockRepository {
 
   async updateStocksValue(id: number): Promise<Stock[]> {
     try {
-      await this.prisma.$executeRaw<any>`SELECT update_stocks(3)`;
-
-      // stocks.map(async (stock) => {
-      //   const random = Math.random();
-      //   const variation = Math.round(Math.random() * 50);
-
-      //   random > 0.5 ? (stock.value -= variation) : (stock.value += variation);
-
-      //   if (stock.value < 50) stock.value = 50;
-
-      //   if (stock.value > 10000) stock.value = 10000;
-
-      //   return await this.prisma
-      //     .$queryRaw`UPDATE "UserStocks" SET value = ${stock.value} WHERE id = ${stock.id}`;
-      // });
+      await this.prisma.$executeRaw`SELECT update_stocks(${id})`;
 
       return await this.getAll(id);
     } catch (err) {
@@ -110,39 +96,27 @@ export class PrismaStockRepository implements StockRepository {
     type: boolean,
   ): Promise<object> {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { balance: true },
-      });
+      await this.prisma.$executeRaw`SELECT update_stock_quantity(
+          ${userId}, 
+          ${userStockId}, 
+          ${quantity},
+          ${type}
+        )`;
 
-      const userStock = await this.prisma.userStocks.findUnique({
-        where: { id: Number(userStockId) },
-        select: { value: true, quantity: true },
-      });
+      const new_balance = await this.prisma
+        .$queryRaw`SELECT balance from "User" where id = ${userId}`.then(
+        (res: { balance: number }[]) => res[0].balance,
+      );
 
-      if (userStock.quantity - quantity < 0 && !type)
-        return { msg: 'Invalid quantity' };
-
-      const newBalance = type
-        ? user.balance - userStock.value * quantity
-        : user.balance + userStock.value * quantity;
-
-      if (newBalance < 0) return { msg: 'Not enough funds' };
-
-      await this.prisma
-        .$queryRaw`UPDATE "User" SET balance = ${newBalance} WHERE id = ${userId}`;
-
-      const newQuantity = type
-        ? userStock.quantity + quantity
-        : userStock.quantity - quantity;
-
-      await this.prisma
-        .$queryRaw`UPDATE "UserStocks" SET quantity = ${newQuantity} WHERE id = ${userStockId}`;
+      const new_quantity = await this.prisma
+        .$queryRaw`SELECT quantity from "UserStocks" where id = ${userStockId}`.then(
+        (res: { quantity: number }[]) => res[0].quantity,
+      );
 
       return {
         id: userStockId,
-        new_balance: newBalance,
-        new_quantity: newQuantity,
+        new_balance,
+        new_quantity,
       };
     } catch (err) {
       console.log(err);
